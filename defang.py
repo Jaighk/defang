@@ -35,6 +35,13 @@ def defang(ioc: dict) -> str:
                 else:
                     output_str += char
 
+    if ioc["ioc_type"] == "ip address":
+        for char in ioc["ioc"]:
+            if char in fanged_strings:
+                output_str += f"[{char}]"
+            else:
+                output_str += char
+
     if ioc["ioc_type"] == "email":
         for char in ioc["ioc"]:
             if char in fanged_strings:
@@ -52,6 +59,7 @@ def generate_output(input: list, output_file=None):
                 "email addresses": [],
                 "sender domains": [],
                 "file hashes": [],
+                "ip addresses": [],
                 "unknown": [],
                 }
 
@@ -61,6 +69,8 @@ def generate_output(input: list, output_file=None):
             defanged["unknown"].append(defang(ioc))
         if ioc["ioc_type"] == "url":
             defanged["urls"].append(defang(ioc))
+        if ioc["ioc_type"] == "ip address":
+            defanged["ip addresses"].append(defang(ioc))
         if ioc["ioc_type"] == "email":
             defanged["email addresses"].append(defang(ioc))
             defanged["sender domains"].append(defang({"ioc":ioc["ioc"].split("@")[1], "ioc_type":"url"}))
