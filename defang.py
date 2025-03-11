@@ -1,58 +1,19 @@
 import re
 from ioc_patterns import *
+from ioc import *
 
-def detect_ioc_type(ioc: str) -> dict:
+def detect_ioc_type(ioc: str):
     for pattern in PATTERNS:
         if re.match(PATTERNS[pattern], ioc):
-            return {"ioc":ioc, "ioc_type": pattern}
-    return {"ioc":ioc, "ioc_type": "unknown"}
-
-def defang(ioc: dict) -> str:
-    fanged_strings = [".", ":"]
-    output_str = ""
-
-    if ioc["ioc_type"] == "url":
-        ioc_proto_url = ioc["ioc"].split(":")
-
-        if len(ioc_proto_url) != 2:
-            for char in ioc["ioc"]: 
-                if char in fanged_strings:
-                    output_str += f"[{char}]"
-                else: 
-                    output_str += char
-        else:
-            for char in ioc_proto_url[0]:
-                if char != "t" and char not in fanged_strings:
-                    output_str += char
-                if char == "t":
-                    output_str += "x"
-                if char in fanged_strings: 
-                    output_str += f"[{char}]"
-            output_str += "[:]"
-            for char in ioc_proto_url[1]:
-                if char in fanged_strings:
-                    output_str += f"[{char}]"
-                else:
-                    output_str += char
-
-    if ioc["ioc_type"] == "ip address":
-        for char in ioc["ioc"]:
-            if char in fanged_strings:
-                output_str += f"[{char}]"
-            else:
-                output_str += char
-
-    if ioc["ioc_type"] == "email":
-        for char in ioc["ioc"]:
-            if char in fanged_strings:
-                output_str += f"[{char}]"
-            else:
-                output_str += char
-
-    if ioc["ioc_type"] == "file hash":
-        output_str = ioc["ioc"]
-
-    return output_str
+            if pattern == "url": 
+                return URL(ioc)
+            if pattern == "file hash":
+                return SHA256FileHash(ioc)
+            if pattern == "email":
+                return Email(ioc)
+            if pattern == "ip address": 
+                return IP(ioc)
+    return Unknown(ioc)
 
 def generate_output(input: list, output_file=None):
     defanged = {"urls": [],
@@ -65,17 +26,21 @@ def generate_output(input: list, output_file=None):
 
     for item in input:
         ioc = detect_ioc_type(item)
-        if ioc["ioc_type"] == "unknown":
-            defanged["unknown"].append(defang(ioc))
-        if ioc["ioc_type"] == "url":
-            defanged["urls"].append(defang(ioc))
-        if ioc["ioc_type"] == "ip address":
-            defanged["ip addresses"].append(defang(ioc))
-        if ioc["ioc_type"] == "email":
-            defanged["email addresses"].append(defang(ioc))
-            defanged["sender domains"].append(defang({"ioc":ioc["ioc"].split("@")[1], "ioc_type":"url"}))
-        if ioc["ioc_type"] == "file hash":
-            defanged["file hashes"].append(defang(ioc))
+        if isinstance(ioc, Unknown):
+            defanged["unknown"].append(ioc.defang())
+        if isinstance(ioc, URL):
+            defanged["urls"].append(ioc.defang())
+        if isinstance(ioc, IP):
+            defanged["ip addresses"].append(ioc.defang())
+        if isinstance(ioc, Email):
+            sender_domain = ioc.value.split("@")[1]
+            sender_domain = URL(sender_domain)
+            defanged["email addresses"].append(ioc.defang())
+            defanged["sender domains"].append(sender_domain.defang())
+        if isinstance(ioc, SHA256FileHash):
+            defanged["file hashes"].append(ioc.defang())
+
+    print(f"{defanged = }")
 
     title = "# Defanged IoCs\n"
     print(title)

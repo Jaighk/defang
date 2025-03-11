@@ -8,7 +8,7 @@ def main():
     args = sys.argv
 
     if len(args)<2:
-        print("Syntax: defang {input_file} (optional) {output_file}")
+        print("Syntax: defang {input_file} {(optional) output_file}")
         sys.exit()
 
     input_file = args[1]
