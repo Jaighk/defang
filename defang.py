@@ -15,7 +15,7 @@ def detect_ioc_type(ioc: str):
                 return IP(ioc)
     return Unknown(ioc)
 
-def generate_output(input: list, output_file=None):
+def build_defanged(input: list) -> dict:
     defanged = {"urls": [],
                 "email addresses": [],
                 "sender domains": [],
@@ -40,7 +40,11 @@ def generate_output(input: list, output_file=None):
         if isinstance(ioc, SHA256FileHash):
             defanged["file hashes"].append(ioc.defang())
 
-    print(f"{defanged = }")
+    return defanged
+
+def generate_output(input: list, output_file=None):
+
+    defanged = build_defanged(input)
 
     title = "# Defanged IoCs\n"
     print(title)
