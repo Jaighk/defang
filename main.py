@@ -1,30 +1,22 @@
 #!/usr/bin/env python3
 
 import sys
+import csv
 
-from defang import *
+from argparse import Namespace
+
+from src.arg_processor import process_args
+from src.defang import (
+        process_iocs,
+        generate_output
+)
+
 
 def main():
-    args = sys.argv
+    args: Namespace = process_args(sys.argv)
+    defanged: dict[str, str] = process_iocs(input_file=args.input_file)
+    generate_output(defanged_iocs=defanged, output_file=args.output_file)
 
-    if len(args)<2:
-        print("Syntax: defang {input_file} {(optional) output_file}")
-        sys.exit()
-
-    input_file = args[1]
-    output_file = None
-
-    if len(args) > 2:
-        output_file = args[2]
-
-    input = []
-    with open(input_file, "r") as f:
-        lines = f.readlines()
-        for line in lines:
-            if line != "\n":
-                input.append(line.strip())
-
-    generate_output(input, output_file)
 
 if __name__== "__main__":
     main()
