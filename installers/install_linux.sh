@@ -16,10 +16,13 @@ cp -rf ./* ~/.bin/.defang_source/
 echo "[+] Files copied to ~/.bin"
 
 # Make the bash script to run the main file
+if test ~/.bin/defang; then
+	rm ~/.bin/defang
+fi
 echo "[-] Making defang executable..."
 touch ~/.bin/defang
 echo "#!/bin/bash" >> ~/.bin/defang
-echo "~/.bin/.defang_source/main.py \$1 \$2" >> ~/.bin/defang
+echo "~/.bin/.defang_source/main.py \$@" >> ~/.bin/defang
 sudo chmod +x ~/.bin/defang
 
 echo "[+] defang is ready for use"
