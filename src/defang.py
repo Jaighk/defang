@@ -37,27 +37,10 @@ def detect_ioc_type(ioc: str) -> Indicator:
 def collect_defanged(iocs: list[Indicator]) -> dict[str, str]:
     defanged_iocs = {}
     for ioc in iocs:
-        match ioc:
-            case URL(): 
-                if not "url" in defanged_iocs.keys():
-                    defanged_iocs["url"] = [ioc.defang()]
-                defanged_iocs["url"].append(ioc.defang())
-            case IP():
-                if not "ip" in defanged_iocs.keys():
-                    defanged_iocs["ip"] = [ioc.defang()]
-                defanged_iocs["ip"].append(ioc.defang())
-            case Email():
-                if not "email" in defanged_iocs.keys():
-                    defanged_iocs["email"] = [ioc.defang()]
-                defanged_iocs["email"].append(ioc.defang())
-            case SHA256FileHash():
-                if not "sha256filehash" in defanged_iocs.keys():
-                    defanged_iocs["sha256filehash"] = [ioc.defang()]
-                defanged_iocs["sha256filehash"].append(ioc.defang())
-            case _:
-                if not "unknown" in defanged_iocs.keys():
-                    defanged_iocs["unknown"] = [ioc.defang()]
-                defanged_iocs["unknown"].append(ioc.defang())
+        if not str(type(ioc)) in defanged_iocs.keys():
+            defanged_iocs[str(type(ioc))] = [ioc.defang()]
+        else:
+            defanged_iocs[str(type(ioc))].append(ioc.defang())
     return defanged_iocs
 
 
@@ -66,7 +49,7 @@ def generate_output(defanged_iocs: dict[str, str], output_file: str | None = Non
     print(title)
     for type in defanged_iocs:
         print(f"## {type}\n")
-        print("```")
+        print("```shell")
         for ioc in defanged_iocs[type]:
             print(f"{ioc}")
         print("```")
