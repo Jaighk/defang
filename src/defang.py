@@ -55,7 +55,7 @@ def collect_defanged(iocs: list[Indicator]) -> dict[str, str]:
                     defanged_iocs["sha256filehash"] = [ioc.defang()]
                 defanged_iocs["sha256filehash"].append(ioc.defang())
             case _:
-                if not defanged_iocs["unknown"] in defanged_iocs.keys():
+                if not "unknown" in defanged_iocs.keys():
                     defanged_iocs["unknown"] = [ioc.defang()]
                 defanged_iocs["unknown"].append(ioc.defang())
     return defanged_iocs
