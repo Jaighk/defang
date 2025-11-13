@@ -16,7 +16,8 @@ def process_iocs(input_file: str) -> dict[str, str]:
     iocs: list[Indicator] = []
     with open(input_file, "r") as file:
         for line in file.readlines():
-            iocs.append(detect_ioc_type(line))
+            if line.strip():
+                iocs.append(detect_ioc_type(line))
         file.close()
     defanged: dict[str, str] = collect_defanged(iocs=iocs)
     return defanged
@@ -37,10 +38,10 @@ def detect_ioc_type(ioc: str) -> Indicator:
 def collect_defanged(iocs: list[Indicator]) -> dict[str, str]:
     defanged_iocs = {}
     for ioc in iocs:
-        if not str(type(ioc)) in defanged_iocs.keys():
-            defanged_iocs[str(type(ioc))] = [ioc.defang()]
+        if not type(ioc).__name__ in defanged_iocs.keys():
+            defanged_iocs[type(ioc).__name__] = [ioc.defang()]
         else:
-            defanged_iocs[str(type(ioc))].append(ioc.defang())
+            defanged_iocs[type(ioc).__name__].append(ioc.defang())
     return defanged_iocs
 
 
